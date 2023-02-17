@@ -14,14 +14,6 @@ const player = {
   imgPath: "./assets/joel.png",
 };
 
-const bulletPatron = {
-  imgPath: "./assets/raquette.png",
-  speed: 3,
-  with: 40,
-  height: 40,
-  lifetime: 900,
-};
-
 let bullets = [];
 
 const game = {
@@ -40,14 +32,24 @@ const game = {
       overlap: 0.4, // percentage of overlap between mobs
     },
   },
+  bullet: {
+    imgPath: "./assets/raquette.png",
+    speed: 3,
+    with: 40,
+    height: 40,
+    lifetime: 900,
+    shootingInterval: null,
+    shootingIntervalDuration: 2000,
+  },
 };
 
 function setup() {
   createCanvas(canva.width, canva.height);
   background(canva.background);
   player.img = loadImage(player.imgPath);
-  bulletPatron.img = loadImage(bulletPatron.imgPath);
+  game.bullet.img = loadImage(game.bullet.imgPath);
   startMobSpawning();
+  startBulletShooting();
 }
 
 function draw() {
@@ -109,48 +111,47 @@ function playerControls() {
 function drawBullets() {
   bullets.forEach((bullet) => {
     if (bullet.direction === "left") {
-      bullet.x -= bulletPatron.speed;
+      bullet.x -= game.bullet.speed;
     } else if (bullet.direction === "right") {
-      bullet.x += bulletPatron.speed;
+      bullet.x += game.bullet.speed;
     } else if (bullet.direction === "up") {
-      bullet.y -= bulletPatron.speed;
+      bullet.y -= game.bullet.speed;
     } else if (bullet.direction === "down") {
-      bullet.y += bulletPatron.speed;
+      bullet.y += game.bullet.speed;
     }
-    image(bulletPatron.img, bullet.x, bullet.y, bullet.width, bullet.height);
+    image(game.bullet.img, bullet.x, bullet.y, bullet.width, bullet.height);
   });
 }
 
 function cleanObjects() {
   bullets = bullets.filter((bullet) => {
-    if (millis() - bullet.creationTime > bulletPatron.lifetime) {
+    if (millis() - bullet.creationTime > game.bullet.lifetime) {
       return false;
     }
     return true;
   });
 }
 
-function keyPressed() {
-  // bullet shooting
-  if (keyCode === 32) {
-    let new_bullet = {};
-    new_bullet.x = Number(player.x);
-    new_bullet.y = Number(player.y + (player.height - bulletPatron.height) / 2);
-    new_bullet.width = Number(bulletPatron.width);
-    new_bullet.height = Number(bulletPatron.height);
-    new_bullet.direction = String(player.direction);
-    new_bullet.lifetime = Number(bulletPatron.speed);
-    new_bullet.creationTime = millis();
-    bullets.push(new_bullet);
-  }
+function shootBullet() {
+  let new_bullet = {};
+  new_bullet.x = Number(player.x);
+  new_bullet.y = Number(player.y + (player.height - game.bullet.height) / 2);
+  new_bullet.width = Number(game.bullet.width);
+  new_bullet.height = Number(game.bullet.height);
+  new_bullet.direction = String(player.direction);
+  new_bullet.lifetime = Number(game.bullet.speed);
+  new_bullet.creationTime = millis();
+  bullets.push(new_bullet);
+}
 
+function keyPressed() {
   // On echap key pause the game
-  if (keyCode === 27 && !game.paused) {
+  if (keyCode === 32 && !game.paused) {
     drawPause();
     noLoop();
     console.log("game paused");
     game.paused = true;
-  } else if (keyCode === 27 && game.paused) {
+  } else if (keyCode === 32 && game.paused) {
     loop();
     console.log("game resumed");
     game.paused = false;
@@ -173,9 +174,19 @@ function stopMobSpawning() {
   clearInterval(game.mob.weak.spawnInterval);
 }
 
+const startBulletShooting = () => {
+  game.bullet.shootingInterval = setInterval(() => {
+    shootBullet();
+  }, game.bullet.shootingIntervalDuration);
+};
+
+const stopBulletShooting = () => {
+  clearInterval(game.bullet.shootingInterval);
+};
+
 /**
  * Spawn a mob in a random position at a certain distance from the player
- * @param {Object} { imgPath, width, height, speed, radiusFromPlayer } Patron of the mob to spawn
+ * @param {Object} { imgPath, width, height, speed, radiusFromPlayer, overlap } Patron of the mob to spawn
  */
 function spawnMob({
   imgPath,
