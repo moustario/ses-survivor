@@ -84,46 +84,33 @@ function drawPlayer() {
 }
 
 function playerControls() {
+  let vx, vy;
   // Player movement
   if (keyIsDown(LEFT_ARROW)) {
-    player.direction.vx = -1;
-    player.direction.vy = 0;
-    player.x -= player.speed;
+    vx = -player.speed;
+    if (keyIsDown(UP_ARROW)) {
+      vx = -player.speed / 3;
+      vy = -player.speed / 3;
+    } else if (keyIsDown(DOWN_ARROW)) {
+      vx = -player.speed / 3;
+      vy = +player.speed / 3;
+    }
   } else if (keyIsDown(RIGHT_ARROW)) {
-    player.direction.vx = 1;
-    player.direction.vy = 0;
-    player.x += player.speed;
+    vx += player.speed;
+    if (keyIsDown(RIGHT_ARROW) && keyIsDown(UP_ARROW)) {
+      vx = +player.speed / 3;
+      vy = -player.speed / 3;
+    } else if (keyIsDown(RIGHT_ARROW) && keyIsDown(DOWN_ARROW)) {
+      vx = +player.speed / 3;
+      vy = +player.speed / 3;
+    }
   } else if (keyIsDown(UP_ARROW)) {
-    player.direction.vx = 0;
-    player.direction.vy = -1;
-    player.y -= player.speed;
+    vy = -player.speed;
   } else if (keyIsDown(DOWN_ARROW)) {
-    player.direction.vx = 0;
-    player.direction.vy = 1;
-    player.y += player.speed;
+    vy = +player.speed;
   }
-  // diagonal movements
-  if (keyIsDown(LEFT_ARROW) && keyIsDown(UP_ARROW)) {
-    player.direction.vx = -1 / 3;
-    player.direction.vy = -1 / 3;
-    player.x -= player.speed / 3;
-    player.y -= player.speed / 3;
-  } else if (keyIsDown(LEFT_ARROW) && keyIsDown(DOWN_ARROW)) {
-    player.direction.vx = -1 / 3;
-    player.direction.vy = 1 / 3;
-    player.x -= player.speed / 3;
-    player.y += player.speed / 3;
-  } else if (keyIsDown(RIGHT_ARROW) && keyIsDown(UP_ARROW)) {
-    player.direction.vx = 1 / 3;
-    player.direction.vy = -1 / 3;
-    player.x += player.speed / 3;
-    player.y -= player.speed / 3;
-  } else if (keyIsDown(RIGHT_ARROW) && keyIsDown(DOWN_ARROW)) {
-    player.direction.vx = 1 / 3;
-    player.direction.vy = 1 / 3;
-    player.x += player.speed / 3;
-    player.y += player.speed / 3;
-  }
+  player.y += vy;
+  player.x += vx;
 }
 
 function drawBullets() {
@@ -156,6 +143,11 @@ function cleanObjects() {
 }
 
 function shootBullet() {
+  // if no mob is alive, no bullet is fired
+  if (game.mob.weak.alive.length === 0) {
+    return;
+  }
+
   let new_bullet = {};
   new_bullet.x = Number(player.x);
   new_bullet.y = Number(player.y + (player.height - game.bullet.height) / 2);
@@ -167,13 +159,6 @@ function shootBullet() {
   new_bullet.damage = Number(game.bullet.damage);
   new_bullet.direction = { vx: 0, vy: 0 };
 
-  // if no mob is alive, fire in direction of player
-  if (game.mob.weak.alive.length === 0) {
-    new_bullet.direction.vx = Number(player.direction.vx);
-    new_bullet.direction.vy = Number(player.direction.vy);
-    bullets.push(new_bullet);
-    return;
-  }
   // fire in direction of closest mob
   let closestMob = game.mob.weak.alive.reduce((closest, current) => {
     let closestDistance = dist(closest.x, closest.y, player.x, player.y);
