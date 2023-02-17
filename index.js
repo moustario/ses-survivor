@@ -293,21 +293,33 @@ function handleCollisions() {
     });
   });
 
+  let mob;
+  let bullet;
   // handle collision between bullet and mob
-  bullets.forEach((bullet) => {
-    // for each bullet, check if it collides with a mob
-    game.mob.weak.alive.forEach((mob) => {
+  for (let i = 0; i < bullets.length; i++) {
+    for (let j = 0; j < game.mob.weak.alive.length; j++) {
+      mob = game.mob.weak.alive[j];
+      bullet = bullets[i];
+
+      bulletPeaks = [
+        { x: bullet.x, y: bullet.y },
+        { x: bullet.x + bullet.width, y: bullet.y },
+        { x: bullet.x, y: bullet.y + bullet.height },
+        { x: bullet.x + bullet.width, y: bullet.y + bullet.height },
+      ];
       if (
-        bullet.x < mob.x + mob.width &&
-        bullet.x + bullet.width > mob.x &&
-        bullet.y < mob.y + mob.height &&
-        bullet.y + bullet.height > mob.y
+        bulletPeaks.some(
+          (peak) =>
+            peak.x > mob.x &&
+            peak.x < mob.x + mob.width &&
+            peak.y > mob.y &&
+            peak.y < mob.y + mob.height
+        )
       ) {
-        // collision detected
-        game.mob.weak.alive = game.mob.weak.alive.filter((m) => m !== mob);
-        bullets = bullets.filter((b) => b !== bullet);
+        game.mob.weak.alive.splice(j, 1);
+        bullets.splice(i, 1);
         game.mob.weak.killed++;
       }
-    });
-  });
+    }
+  }
 }
