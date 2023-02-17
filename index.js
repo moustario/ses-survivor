@@ -25,7 +25,7 @@ const game = {
     weak: {
       alive: [],
       killed: 0,
-      spawnIntervalDuration: 5000,
+      spawnIntervalDuration: 1000,
       spawnInterval: null,
       imgPath: "./assets/akon.png",
       width: 50,
@@ -33,6 +33,7 @@ const game = {
       speed: 1,
       radiusFromPlayer: 350,
       overlap: 0.4, // percentage of overlap between mobs
+      health: 5,
     },
   },
   bullet: {
@@ -43,6 +44,7 @@ const game = {
     lifetime: 900,
     shootingInterval: null,
     shootingIntervalDuration: 2000,
+    damage: 5,
   },
 };
 
@@ -138,6 +140,9 @@ function cleanObjects() {
     if (millis() - bullet.creationTime > game.bullet.lifetime) {
       return false;
     }
+    if (bullet.hit) {
+      return false;
+    }
     return true;
   });
 
@@ -158,6 +163,8 @@ function shootBullet() {
   new_bullet.height = Number(game.bullet.height);
   new_bullet.lifetime = Number(game.bullet.speed);
   new_bullet.creationTime = millis();
+  new_bullet.hit = false;
+  new_bullet.damage = Number(game.bullet.damage);
   new_bullet.direction = { vx: 0, vy: 0 };
 
   // if no mob is alive, fire in direction of player
@@ -237,6 +244,7 @@ function spawnMob({
   speed,
   radiusFromPlayer,
   overlap,
+  health,
 }) {
   let new_mob = {};
   new_mob.img = loadImage(imgPath);
@@ -246,6 +254,7 @@ function spawnMob({
   new_mob.x = player.x + random(-radiusFromPlayer, radiusFromPlayer);
   new_mob.y = player.y + random(-radiusFromPlayer, radiusFromPlayer);
   new_mob.overlap = overlap;
+  new_mob.health = health;
   game.mob.weak.alive.push(new_mob);
 }
 
@@ -293,8 +302,7 @@ function handleCollisions() {
     });
   });
 
-  let mob;
-  let bullet;
+  let mob, bullet;
   // handle collision between bullet and mob
   for (let i = 0; i < bullets.length; i++) {
     for (let j = 0; j < game.mob.weak.alive.length; j++) {
@@ -316,8 +324,8 @@ function handleCollisions() {
             peak.y < mob.y + mob.height
         )
       ) {
-        game.mob.weak.alive.splice(j, 1);
-        bullets.splice(i, 1);
+        game.mob.weak.alive[j].health -= bullet.damage;
+        bullets[i].hit = true;
         game.mob.weak.killed++;
       }
     }
