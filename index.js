@@ -7,11 +7,14 @@ const canva = {
 const player = {
   width: 50,
   height: 50,
-  x: 10,
-  y: 10,
+  x: canva.width / 2 - 25,
+  y: canva.height / 2 - 25,
   speed: 2,
-  direction: "down",
   imgPath: "./assets/joel.png",
+  direction: {
+    vx: 0,
+    vy: 0,
+  },
 };
 
 let bullets = [];
@@ -60,6 +63,7 @@ function draw() {
   drawBullets();
   drawMobs();
 
+  handleCollisions();
   cleanObjects();
 }
 
@@ -80,29 +84,41 @@ function drawPlayer() {
 function playerControls() {
   // Player movement
   if (keyIsDown(LEFT_ARROW)) {
+    player.direction.vx = -1;
+    player.direction.vy = 0;
     player.x -= player.speed;
-    player.direction = "left";
   } else if (keyIsDown(RIGHT_ARROW)) {
+    player.direction.vx = 1;
+    player.direction.vy = 0;
     player.x += player.speed;
-    player.direction = "right";
   } else if (keyIsDown(UP_ARROW)) {
+    player.direction.vx = 0;
+    player.direction.vy = -1;
     player.y -= player.speed;
-    player.direction = "up";
   } else if (keyIsDown(DOWN_ARROW)) {
+    player.direction.vx = 0;
+    player.direction.vy = 1;
     player.y += player.speed;
-    player.direction = "down";
   }
   // diagonal movements
   if (keyIsDown(LEFT_ARROW) && keyIsDown(UP_ARROW)) {
+    player.direction.vx = -1 / 3;
+    player.direction.vy = -1 / 3;
     player.x -= player.speed / 3;
     player.y -= player.speed / 3;
   } else if (keyIsDown(LEFT_ARROW) && keyIsDown(DOWN_ARROW)) {
+    player.direction.vx = -1 / 3;
+    player.direction.vy = 1 / 3;
     player.x -= player.speed / 3;
     player.y += player.speed / 3;
   } else if (keyIsDown(RIGHT_ARROW) && keyIsDown(UP_ARROW)) {
+    player.direction.vx = 1 / 3;
+    player.direction.vy = -1 / 3;
     player.x += player.speed / 3;
     player.y -= player.speed / 3;
   } else if (keyIsDown(RIGHT_ARROW) && keyIsDown(DOWN_ARROW)) {
+    player.direction.vx = 1 / 3;
+    player.direction.vy = 1 / 3;
     player.x += player.speed / 3;
     player.y += player.speed / 3;
   }
@@ -110,22 +126,24 @@ function playerControls() {
 
 function drawBullets() {
   bullets.forEach((bullet) => {
-    if (bullet.direction === "left") {
-      bullet.x -= game.bullet.speed;
-    } else if (bullet.direction === "right") {
-      bullet.x += game.bullet.speed;
-    } else if (bullet.direction === "up") {
-      bullet.y -= game.bullet.speed;
-    } else if (bullet.direction === "down") {
-      bullet.y += game.bullet.speed;
-    }
+    bullet.x += bullet.direction.vx * game.bullet.speed;
+    bullet.y += bullet.direction.vy * game.bullet.speed;
     image(game.bullet.img, bullet.x, bullet.y, bullet.width, bullet.height);
   });
 }
 
 function cleanObjects() {
+  // remove old bullets
   bullets = bullets.filter((bullet) => {
     if (millis() - bullet.creationTime > game.bullet.lifetime) {
+      return false;
+    }
+    return true;
+  });
+
+  // remove dead mobs
+  game.mob.weak.alive = game.mob.weak.alive.filter((mob) => {
+    if (mob.health <= 0) {
       return false;
     }
     return true;
@@ -138,9 +156,29 @@ function shootBullet() {
   new_bullet.y = Number(player.y + (player.height - game.bullet.height) / 2);
   new_bullet.width = Number(game.bullet.width);
   new_bullet.height = Number(game.bullet.height);
-  new_bullet.direction = String(player.direction);
   new_bullet.lifetime = Number(game.bullet.speed);
   new_bullet.creationTime = millis();
+  new_bullet.direction = { vx: 0, vy: 0 };
+
+  // if no mob is alive, fire in direction of player
+  if (game.mob.weak.alive.length === 0) {
+    new_bullet.direction.vx = Number(player.direction.vx);
+    new_bullet.direction.vy = Number(player.direction.vy);
+    bullets.push(new_bullet);
+    return;
+  }
+  // fire in direction of closest mob
+  let closestMob = game.mob.weak.alive.reduce((closest, current) => {
+    let closestDistance = dist(closest.x, closest.y, player.x, player.y);
+    let currentDistance = dist(current.x, current.y, player.x, player.y);
+    return closestDistance < currentDistance ? closest : current;
+  }, game.mob.weak.alive[0]);
+  let angle = atan2(
+    Number(closestMob.y) - Number(player.y),
+    Number(closestMob.x) - Number(player.x)
+  );
+  new_bullet.direction.vx = cos(angle);
+  new_bullet.direction.vy = sin(angle);
   bullets.push(new_bullet);
 }
 
@@ -166,6 +204,8 @@ function drawPause() {
 
 function startMobSpawning() {
   game.mob.weak.spawnInterval = setInterval(() => {
+    if (game.paused) return;
+
     spawnMob(game.mob.weak);
   }, game.mob.weak.spawnIntervalDuration);
 }
@@ -176,6 +216,8 @@ function stopMobSpawning() {
 
 const startBulletShooting = () => {
   game.bullet.shootingInterval = setInterval(() => {
+    if (game.paused) return;
+
     shootBullet();
   }, game.bullet.shootingIntervalDuration);
 };
@@ -220,7 +262,13 @@ function drawMobs() {
     } else if (player.y < mob.y) {
       mob.y -= mob.speed;
     }
-    // check for collision with other mobs allowing the mob overlap
+    image(mob.img, mob.x, mob.y, mob.width, mob.height);
+  });
+}
+
+function handleCollisions() {
+  // check for collision with other mobs allowing the mob overlap
+  game.mob.weak.alive.forEach((mob) => {
     game.mob.weak.alive.forEach((otherMob) => {
       if (mob !== otherMob) {
         if (
@@ -243,6 +291,23 @@ function drawMobs() {
         }
       }
     });
-    image(mob.img, mob.x, mob.y, mob.width, mob.height);
+  });
+
+  // handle collision between bullet and mob
+  bullets.forEach((bullet) => {
+    // for each bullet, check if it collides with a mob
+    game.mob.weak.alive.forEach((mob) => {
+      if (
+        bullet.x < mob.x + mob.width &&
+        bullet.x + bullet.width > mob.x &&
+        bullet.y < mob.y + mob.height &&
+        bullet.y + bullet.height > mob.y
+      ) {
+        // collision detected
+        game.mob.weak.alive = game.mob.weak.alive.filter((m) => m !== mob);
+        bullets = bullets.filter((b) => b !== bullet);
+        game.mob.weak.killed++;
+      }
+    });
   });
 }
