@@ -25,15 +25,7 @@ const game = {
     weak: {
       alive: [],
       killed: 0,
-      spawnIntervalDuration: 1000,
       spawnInterval: null,
-      imgPath: "./assets/akon.png",
-      width: 25,
-      height: 35,
-      speed: 1,
-      radiusFromPlayer: canva.width / 2,
-      overlap: 0.6, // percentage of overlap between mobs
-      health: 5,
     },
   },
   effects: {

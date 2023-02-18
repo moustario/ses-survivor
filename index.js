@@ -1,5 +1,5 @@
 function preload() {
-  game.music = new Audio(game.effects.backgroundMusicPath);
+  game.music = createAudio(game.effects.backgroundMusicPath);
   game.effects.bulletSound = new Audio(game.effects.bulletSoundPath);
   game.background.img = loadImage(game.background.imgPath);
 }
@@ -157,9 +157,8 @@ function moveEveryEntity({ x, y }) {
 }
 
 function startBackgroundMusic() {
-  game.music.loop = true;
-  game.music.volume = 0.1;
-  game.music.play();
+  game.music.loop();
+  game.music.volume(0.1);
 }
 
 function drawBackground() {

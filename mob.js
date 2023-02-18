@@ -1,9 +1,25 @@
+const mobPatron = {
+  weak: {
+    spawnIntervalDuration: 1000,
+    imgPath: "./assets/akon.png",
+    width: 25,
+    height: 35,
+    speed: 1,
+    spawingHalo: {
+      start: player.width * 3,
+      end: canva.width / 2,
+    },
+    overlap: 0.6, // percentage of overlap between mobs
+    health: 5,
+  },
+};
+
 function startMobSpawning() {
   game.mob.weak.spawnInterval = setInterval(() => {
     if (game.paused) return;
 
-    spawnMob(game.mob.weak);
-  }, game.mob.weak.spawnIntervalDuration);
+    spawnMob(mobPatron.weak);
+  }, mobPatron.weak.spawnIntervalDuration);
 }
 
 function stopMobSpawning() {
@@ -19,17 +35,21 @@ function spawnMob({
   width,
   height,
   speed,
-  radiusFromPlayer,
   overlap,
   health,
+  spawingHalo,
 }) {
   let new_mob = {};
   new_mob.img = loadImage(imgPath);
   new_mob.width = width;
   new_mob.height = height;
   new_mob.speed = speed;
-  new_mob.x = player.x + random(-radiusFromPlayer, radiusFromPlayer);
-  new_mob.y = player.y + random(-radiusFromPlayer, radiusFromPlayer);
+  // random position betwen cercle of radius spawnHalo.start and spawnHalo.end
+  const distanceFromPlayer = random(spawingHalo.start, spawingHalo.end);
+  // random angle
+  const angle = random(0, 2 * Math.PI);
+  new_mob.x = player.x + distanceFromPlayer * Math.cos(angle);
+  new_mob.y = player.y + distanceFromPlayer * Math.sin(angle);
   new_mob.overlap = overlap;
   new_mob.health = health;
   game.mob.weak.alive.push(new_mob);
