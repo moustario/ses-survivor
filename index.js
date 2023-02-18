@@ -23,9 +23,7 @@ function draw() {
 
   handleCollisions();
   cleanObjects();
-  if (game.paused) {
-    drawPause();
-  }
+  drawUI();
 }
 
 function cleanObjects() {
@@ -60,12 +58,6 @@ function keyPressed() {
     }
     game.paused = !game.paused;
   }
-}
-
-function drawPause() {
-  fill(game.ui.pause.textColor);
-  textSize(game.ui.pause.textSize);
-  text(game.ui.pause.text, game.ui.pause.x, game.ui.pause.y);
 }
 
 function handleCollisions() {

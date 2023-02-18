@@ -1,6 +1,5 @@
 function drawBullets() {
   bullets.forEach((bullet) => {
-    console.log("drawing bullet");
     bullet.x += bullet.direction.vx * bulletPatron.speed;
     bullet.y += bullet.direction.vy * bulletPatron.speed;
     image(bulletPatron.img, bullet.x, bullet.y, bullet.width, bullet.height);

@@ -15,6 +15,7 @@ const player = {
     vx: 0,
     vy: 0,
   },
+  health: 100,
 };
 
 const game = {
@@ -49,20 +50,6 @@ const game = {
     offset: {
       x: 0,
       y: 0,
-    },
-  },
-  ui: {
-    lifeBar: {
-      width: canva.width,
-      height: 50,
-    },
-    pause: {
-      text: "PAUSE",
-      textSize: 50,
-      textFont: "Arial",
-      textColor: [255, 168, 0],
-      x: 20,
-      y: 80,
     },
   },
   bullet: {
