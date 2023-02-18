@@ -8,8 +8,8 @@ const pause = {
   textSize: 50,
   textFont: "Arial",
   textColor: [255, 168, 0],
-  x: 20,
-  y: 80,
+  x: canva.width / 2,
+  y: canva.height / 3,
 };
 
 function drawUI() {
@@ -20,6 +20,7 @@ function drawUI() {
 
 function drawPause() {
   fill(pause.textColor);
+  textAlign(CENTER, CENTER);
   textSize(pause.textSize);
   text(pause.text, pause.x, pause.y);
 }
