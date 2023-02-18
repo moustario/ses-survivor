@@ -15,7 +15,8 @@ const player = {
     vx: 0,
     vy: 0,
   },
-  health: 100,
+  health: 1000,
+  maxHealth: 1000,
 };
 
 const game = {

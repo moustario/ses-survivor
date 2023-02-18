@@ -11,6 +11,7 @@ const mobPatron = {
     },
     overlap: 0.6, // percentage of overlap between mobs
     health: 5,
+    damage: 1,
   },
 };
 
@@ -38,6 +39,7 @@ function spawnMob({
   overlap,
   health,
   spawingHalo,
+  damage,
 }) {
   let new_mob = {};
   new_mob.img = loadImage(imgPath);
@@ -52,6 +54,7 @@ function spawnMob({
   new_mob.y = player.y + distanceFromPlayer * Math.sin(angle);
   new_mob.overlap = overlap;
   new_mob.health = health;
+  new_mob.damage = damage;
   game.mob.weak.alive.push(new_mob);
 }
 

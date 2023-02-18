@@ -15,14 +15,16 @@ function setup() {
 
 function draw() {
   drawBackground();
-  drawPlayer();
 
+  drawPlayer();
   playerControls();
+
   drawBullets();
   drawMobs();
 
   handleCollisions();
   cleanObjects();
+
   drawUI();
 }
 
@@ -129,6 +131,41 @@ function handleCollisions() {
       }
     }
   }
+
+  // handle collision between player and mob
+  game.mob.weak.alive.forEach((mob) => {
+    const mobPeaks = [
+      { x: mob.x, y: mob.y },
+      { x: mob.x + mob.width, y: mob.y },
+      { x: mob.x, y: mob.y + mob.height },
+      { x: mob.x + mob.width, y: mob.y + mob.height },
+    ];
+    const playerPeaks = [
+      { x: player.x, y: player.y },
+      { x: player.x + player.width, y: player.y },
+      { x: player.x, y: player.y + player.height },
+      { x: player.x + player.width, y: player.y + player.height },
+    ];
+    if (
+      mobPeaks.some(
+        (peak) =>
+          peak.x > player.x &&
+          peak.x < player.x + player.width &&
+          peak.y > player.y &&
+          peak.y < player.y + player.height
+      ) ||
+      playerPeaks.some(
+        (peak) =>
+          peak.x > mob.x &&
+          peak.x < mob.x + mob.width &&
+          peak.y > mob.y &&
+          peak.y < mob.y + mob.height
+      )
+    ) {
+      // collision detected
+      player.health -= mob.damage;
+    }
+  });
 }
 
 /**
