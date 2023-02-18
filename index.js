@@ -1,12 +1,12 @@
 const canva = {
   background: "#b2b2b2",
   width: 800,
-  height: 440,
+  height: 500,
 };
 
 const player = {
-  width: 50,
-  height: 50,
+  width: 46,
+  height: 46,
   x: canva.width / 2 - 25,
   y: canva.height / 2 - 25,
   speed: 2,
@@ -28,11 +28,11 @@ const game = {
       spawnIntervalDuration: 1000,
       spawnInterval: null,
       imgPath: "./assets/akon.png",
-      width: 50,
-      height: 50,
+      width: 25,
+      height: 35,
       speed: 1,
       radiusFromPlayer: 450,
-      overlap: 0.4, // percentage of overlap between mobs
+      overlap: 0.6, // percentage of overlap between mobs
       health: 5,
     },
   },
@@ -46,7 +46,17 @@ const game = {
     shootingIntervalDuration: 2000,
     damage: 5,
   },
+  effects: {
+    backgroundMusicPath: "./assets/background.mp3",
+    bulletSoundPath: "./assets/tennis_ball.mp3",
+    soundTimeout: 500,
+  },
 };
+
+function preload() {
+  game.music = new Audio(game.effects.backgroundMusicPath);
+  game.effects.bulletSound = new Audio(game.effects.bulletSoundPath);
+}
 
 function setup() {
   createCanvas(canva.width, canva.height);
@@ -55,6 +65,7 @@ function setup() {
   game.bullet.img = loadImage(game.bullet.imgPath);
   startMobSpawning();
   startBulletShooting();
+  startBackgroundMusic();
 }
 
 function draw() {
@@ -84,7 +95,7 @@ function drawPlayer() {
 }
 
 function playerControls() {
-  const v = { x: 0, y: 0 }
+  const v = { x: 0, y: 0 };
   // Player movement
   if (keyIsDown(LEFT_ARROW)) {
     v.x = -player.speed;
@@ -147,30 +158,37 @@ function shootBullet() {
     return;
   }
 
-  let new_bullet = {};
-  new_bullet.x = Number(player.x);
-  new_bullet.y = Number(player.y + (player.height - game.bullet.height) / 2);
-  new_bullet.width = Number(game.bullet.width);
-  new_bullet.height = Number(game.bullet.height);
-  new_bullet.lifetime = Number(game.bullet.speed);
-  new_bullet.creationTime = millis();
-  new_bullet.hit = false;
-  new_bullet.damage = Number(game.bullet.damage);
-  new_bullet.direction = { vx: 0, vy: 0 };
+  // play bullet sound, has a bit a of a delay
+  game.effects.bulletSound.loop = false;
+  game.effects.bulletSound.play();
 
-  // fire in direction of closest mob
-  let closestMob = game.mob.weak.alive.reduce((closest, current) => {
-    let closestDistance = dist(closest.x, closest.y, player.x, player.y);
-    let currentDistance = dist(current.x, current.y, player.x, player.y);
-    return closestDistance < currentDistance ? closest : current;
-  }, game.mob.weak.alive[0]);
-  let angle = atan2(
-    Number(closestMob.y) - Number(player.y),
-    Number(closestMob.x) - Number(player.x)
-  );
-  new_bullet.direction.vx = cos(angle);
-  new_bullet.direction.vy = sin(angle);
-  bullets.push(new_bullet);
+  // We delay the creation of the bullet to compensate for the sound
+  setTimeout(() => {
+    let new_bullet = {};
+    new_bullet.x = Number(player.x);
+    new_bullet.y = Number(player.y + (player.height - game.bullet.height) / 2);
+    new_bullet.width = Number(game.bullet.width);
+    new_bullet.height = Number(game.bullet.height);
+    new_bullet.lifetime = Number(game.bullet.speed);
+    new_bullet.creationTime = millis();
+    new_bullet.hit = false;
+    new_bullet.damage = Number(game.bullet.damage);
+    new_bullet.direction = { vx: 0, vy: 0 };
+
+    // fire in direction of closest mob
+    let closestMob = game.mob.weak.alive.reduce((closest, current) => {
+      let closestDistance = dist(closest.x, closest.y, player.x, player.y);
+      let currentDistance = dist(current.x, current.y, player.x, player.y);
+      return closestDistance < currentDistance ? closest : current;
+    }, game.mob.weak.alive[0]);
+    let angle = atan2(
+      Number(closestMob.y) - Number(player.y),
+      Number(closestMob.x) - Number(player.x)
+    );
+    new_bullet.direction.vx = cos(angle);
+    new_bullet.direction.vy = sin(angle);
+    bullets.push(new_bullet);
+  }, game.effects.soundTimeout);
 }
 
 function keyPressed() {
@@ -299,6 +317,13 @@ function handleCollisions() {
         { x: bullet.x, y: bullet.y + bullet.height },
         { x: bullet.x + bullet.width, y: bullet.y + bullet.height },
       ];
+
+      mobPeaks = [
+        { x: mob.x, y: mob.y },
+        { x: mob.x + mob.width, y: mob.y },
+        { x: mob.x, y: mob.y + mob.height },
+        { x: mob.x + mob.width, y: mob.y + mob.height },
+      ];
       if (
         bulletPeaks.some(
           (peak) =>
@@ -306,6 +331,13 @@ function handleCollisions() {
             peak.x < mob.x + mob.width &&
             peak.y > mob.y &&
             peak.y < mob.y + mob.height
+        ) ||
+        mobPeaks.some(
+          (peak) =>
+            peak.x > bullet.x &&
+            peak.x < bullet.x + bullet.width &&
+            peak.y > bullet.y &&
+            peak.y < bullet.y + bullet.height
         )
       ) {
         game.mob.weak.alive[j].health -= bullet.damage;
@@ -317,7 +349,7 @@ function handleCollisions() {
 }
 
 /**
- * To keep the player at the center of the screen 
+ * To keep the player at the center of the screen
  * we move every entity in the opposite direction of the player
  * @param {x, y} param0 movement vector of the player
  */
@@ -330,4 +362,10 @@ function moveEveryEntity({ x, y }) {
     bullet.x -= x;
     bullet.y -= y;
   });
+}
+
+function startBackgroundMusic() {
+  game.music.loop = true;
+  game.music.volume = 0.1;
+  game.music.play();
 }
