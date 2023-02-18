@@ -31,7 +31,7 @@ const game = {
       width: 50,
       height: 50,
       speed: 1,
-      radiusFromPlayer: 350,
+      radiusFromPlayer: 450,
       overlap: 0.4, // percentage of overlap between mobs
       health: 5,
     },
@@ -84,33 +84,32 @@ function drawPlayer() {
 }
 
 function playerControls() {
-  let vx, vy;
+  const v = { x: 0, y: 0 }
   // Player movement
   if (keyIsDown(LEFT_ARROW)) {
-    vx = -player.speed;
+    v.x = -player.speed;
     if (keyIsDown(UP_ARROW)) {
-      vx = -player.speed / 3;
-      vy = -player.speed / 3;
+      v.x = -player.speed * 0.7;
+      v.y = -player.speed * 0.7;
     } else if (keyIsDown(DOWN_ARROW)) {
-      vx = -player.speed / 3;
-      vy = +player.speed / 3;
+      v.x = -player.speed * 0.7;
+      v.y = +player.speed * 0.7;
     }
   } else if (keyIsDown(RIGHT_ARROW)) {
-    vx += player.speed;
+    v.x += player.speed;
     if (keyIsDown(RIGHT_ARROW) && keyIsDown(UP_ARROW)) {
-      vx = +player.speed / 3;
-      vy = -player.speed / 3;
+      v.x = +player.speed * 0.7;
+      v.y = -player.speed * 0.7;
     } else if (keyIsDown(RIGHT_ARROW) && keyIsDown(DOWN_ARROW)) {
-      vx = +player.speed / 3;
-      vy = +player.speed / 3;
+      v.x = +player.speed * 0.7;
+      v.y = +player.speed * 0.7;
     }
   } else if (keyIsDown(UP_ARROW)) {
-    vy = -player.speed;
+    v.y = -player.speed;
   } else if (keyIsDown(DOWN_ARROW)) {
-    vy = +player.speed;
+    v.y = +player.speed;
   }
-  player.y += vy;
-  player.x += vx;
+  moveEveryEntity(v);
 }
 
 function drawBullets() {
@@ -315,4 +314,20 @@ function handleCollisions() {
       }
     }
   }
+}
+
+/**
+ * To keep the player at the center of the screen 
+ * we move every entity in the opposite direction of the player
+ * @param {x, y} param0 movement vector of the player
+ */
+function moveEveryEntity({ x, y }) {
+  game.mob.weak.alive.forEach((mob) => {
+    mob.x -= x;
+    mob.y -= y;
+  });
+  bullets.forEach((bullet) => {
+    bullet.x -= x;
+    bullet.y -= y;
+  });
 }
