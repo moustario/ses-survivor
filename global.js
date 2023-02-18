@@ -1,6 +1,7 @@
 const canva = {
-  width: 800,
-  height: 500,
+  width: window.innerWidth - 4,
+  height: window.innerHeight - 4,
+  obj: null,
 };
 
 const player = {
@@ -29,7 +30,7 @@ const game = {
       width: 25,
       height: 35,
       speed: 1,
-      radiusFromPlayer: 450,
+      radiusFromPlayer: canva.width / 2,
       overlap: 0.6, // percentage of overlap between mobs
       health: 5,
     },
@@ -66,7 +67,8 @@ const game = {
   },
   bullet: {
     imgPath: "./assets/raquette.png",
-    speed: 3,
+    // limit around 3
+    speed: 2,
     with: 40,
     height: 40,
     lifetime: 900,
