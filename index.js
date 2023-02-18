@@ -29,7 +29,7 @@ function draw() {
 function cleanObjects() {
   // remove old bullets
   bullets = bullets.filter((bullet) => {
-    if (millis() - bullet.creationTime > game.bullet.lifetime) {
+    if (millis() - bullet.creationTime > bulletPatron.lifetime) {
       return false;
     }
     if (bullet.hit) {

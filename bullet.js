@@ -1,3 +1,15 @@
+const bulletPatron = {
+  imgPath: "./assets/raquette.png",
+  // limite around 3
+  speed: 2,
+  with: 40,
+  height: 40,
+  lifetime: 900,
+  shootingInterval: null,
+  shootingIntervalDuration: 2000,
+  damage: 5,
+};
+
 function drawBullets() {
   bullets.forEach((bullet) => {
     bullet.x += bullet.direction.vx * bulletPatron.speed;
@@ -23,14 +35,17 @@ function shootBullet() {
   // We delay the creation of the bullet to compensate for the sound
   setTimeout(() => {
     let new_bullet = {};
+
+    // new bullet must spawn at the center of the player
     new_bullet.x = Number(player.x);
-    new_bullet.y = Number(player.y + (player.height - game.bullet.height) / 2);
-    new_bullet.width = Number(game.bullet.width);
-    new_bullet.height = Number(game.bullet.height);
-    new_bullet.lifetime = Number(game.bullet.speed);
+    new_bullet.y = Number(player.y);
+
+    new_bullet.width = Number(bulletPatron.width);
+    new_bullet.height = Number(bulletPatron.height);
+    new_bullet.lifetime = Number(bulletPatron.speed);
     new_bullet.creationTime = millis();
     new_bullet.hit = false;
-    new_bullet.damage = Number(game.bullet.damage);
+    new_bullet.damage = Number(bulletPatron.damage);
     new_bullet.direction = { vx: 0, vy: 0 };
 
     // fire in direction of closest mob
@@ -108,13 +123,13 @@ function collisionWithMob(mobsArray) {
 }
 
 const startBulletShooting = () => {
-  game.bullet.shootingInterval = setInterval(() => {
+  bulletPatron.shootingInterval = setInterval(() => {
     if (game.paused) return;
 
     shootBullet();
-  }, game.bullet.shootingIntervalDuration);
+  }, bulletPatron.shootingIntervalDuration);
 };
 
 const stopBulletShooting = () => {
-  clearInterval(game.bullet.shootingInterval);
+  clearInterval(bulletPatron.shootingInterval);
 };

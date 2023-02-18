@@ -7,8 +7,8 @@ const canva = {
 const player = {
   width: 46,
   height: 46,
-  x: canva.width / 2 - 25,
-  y: canva.height / 2 - 25,
+  x: canva.width / 2 - 23,
+  y: canva.height / 2 - 23,
   speed: 2,
   imgPath: "./assets/joel.png",
   direction: {
@@ -44,28 +44,6 @@ const game = {
       y: 0,
     },
   },
-  bullet: {
-    imgPath: "./assets/raquette.png",
-    // limit around 3
-    speed: 2,
-    with: 40,
-    height: 40,
-    lifetime: 900,
-    shootingInterval: null,
-    shootingIntervalDuration: 2000,
-    damage: 5,
-  },
 };
 
 let bullets = [];
-
-const bulletPatron = {
-  imgPath: "./assets/raquette.png",
-  speed: 3,
-  with: 40,
-  height: 40,
-  lifetime: 900,
-  shootingInterval: null,
-  shootingIntervalDuration: 2000,
-  damage: 5,
-};
