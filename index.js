@@ -1,75 +1,20 @@
-const canva = {
-  background: "#b2b2b2",
-  width: 800,
-  height: 500,
-};
-
-const player = {
-  width: 46,
-  height: 46,
-  x: canva.width / 2 - 25,
-  y: canva.height / 2 - 25,
-  speed: 2,
-  imgPath: "./assets/joel.png",
-  direction: {
-    vx: 0,
-    vy: 0,
-  },
-};
-
-let bullets = [];
-
-const game = {
-  paused: false,
-  mob: {
-    weak: {
-      alive: [],
-      killed: 0,
-      spawnIntervalDuration: 1000,
-      spawnInterval: null,
-      imgPath: "./assets/akon.png",
-      width: 25,
-      height: 35,
-      speed: 1,
-      radiusFromPlayer: 450,
-      overlap: 0.6, // percentage of overlap between mobs
-      health: 5,
-    },
-  },
-  bullet: {
-    imgPath: "./assets/raquette.png",
-    speed: 3,
-    with: 40,
-    height: 40,
-    lifetime: 900,
-    shootingInterval: null,
-    shootingIntervalDuration: 2000,
-    damage: 5,
-  },
-  effects: {
-    backgroundMusicPath: "./assets/background.mp3",
-    bulletSoundPath: "./assets/tennis_ball.mp3",
-    soundTimeout: 500,
-  },
-};
-
 function preload() {
   game.music = new Audio(game.effects.backgroundMusicPath);
   game.effects.bulletSound = new Audio(game.effects.bulletSoundPath);
+  game.background.img = loadImage(game.background.imgPath);
 }
 
 function setup() {
   createCanvas(canva.width, canva.height);
-  background(canva.background);
-  player.img = loadImage(player.imgPath);
-  game.bullet.img = loadImage(game.bullet.imgPath);
+  loadPlayer();
+  loadBullet();
   startMobSpawning();
   startBulletShooting();
   startBackgroundMusic();
 }
 
 function draw() {
-  background(canva.background);
+  drawBackground();
   drawPlayer();
 
   playerControls();
@@ -78,57 +23,9 @@ function draw() {
 
   handleCollisions();
   cleanObjects();
-}
-
-function drawPlayer() {
-  // Player boundaries
-  if (player.x < 0) {
-    player.x = 0;
-  } else if (player.x > canva.width - player.width) {
-    player.x = canva.width - player.width;
-  } else if (player.y < 0) {
-    player.y = 0;
-  } else if (player.y > canva.height - player.height) {
-    player.y = canva.height - player.height;
+  if (game.paused) {
+    drawPause();
   }
-  image(player.img, player.x, player.y, player.width, player.height);
-}
-
-function playerControls() {
-  const v = { x: 0, y: 0 };
-  // Player movement
-  if (keyIsDown(LEFT_ARROW)) {
-    v.x = -player.speed;
-    if (keyIsDown(UP_ARROW)) {
-      v.x = -player.speed * 0.7;
-      v.y = -player.speed * 0.7;
-    } else if (keyIsDown(DOWN_ARROW)) {
-      v.x = -player.speed * 0.7;
-      v.y = +player.speed * 0.7;
-    }
-  } else if (keyIsDown(RIGHT_ARROW)) {
-    v.x += player.speed;
-    if (keyIsDown(RIGHT_ARROW) && keyIsDown(UP_ARROW)) {
-      v.x = +player.speed * 0.7;
-      v.y = -player.speed * 0.7;
-    } else if (keyIsDown(RIGHT_ARROW) && keyIsDown(DOWN_ARROW)) {
-      v.x = +player.speed * 0.7;
-      v.y = +player.speed * 0.7;
-    }
-  } else if (keyIsDown(UP_ARROW)) {
-    v.y = -player.speed;
-  } else if (keyIsDown(DOWN_ARROW)) {
-    v.y = +player.speed;
-  }
-  moveEveryEntity(v);
-}
-
-function drawBullets() {
-  bullets.forEach((bullet) => {
-    bullet.x += bullet.direction.vx * game.bullet.speed;
-    bullet.y += bullet.direction.vy * game.bullet.speed;
-    image(game.bullet.img, bullet.x, bullet.y, bullet.width, bullet.height);
-  });
 }
 
 function cleanObjects() {
@@ -152,129 +49,23 @@ function cleanObjects() {
   });
 }
 
-function shootBullet() {
-  // if no mob is alive, no bullet is fired
-  if (game.mob.weak.alive.length === 0) {
-    return;
-  }
-
-  // play bullet sound, has a bit a of a delay
-  game.effects.bulletSound.loop = false;
-  game.effects.bulletSound.play();
-
-  // We delay the creation of the bullet to compensate for the sound
-  setTimeout(() => {
-    let new_bullet = {};
-    new_bullet.x = Number(player.x);
-    new_bullet.y = Number(player.y + (player.height - game.bullet.height) / 2);
-    new_bullet.width = Number(game.bullet.width);
-    new_bullet.height = Number(game.bullet.height);
-    new_bullet.lifetime = Number(game.bullet.speed);
-    new_bullet.creationTime = millis();
-    new_bullet.hit = false;
-    new_bullet.damage = Number(game.bullet.damage);
-    new_bullet.direction = { vx: 0, vy: 0 };
-
-    // fire in direction of closest mob
-    let closestMob = game.mob.weak.alive.reduce((closest, current) => {
-      let closestDistance = dist(closest.x, closest.y, player.x, player.y);
-      let currentDistance = dist(current.x, current.y, player.x, player.y);
-      return closestDistance < currentDistance ? closest : current;
-    }, game.mob.weak.alive[0]);
-    let angle = atan2(
-      Number(closestMob.y) - Number(player.y),
-      Number(closestMob.x) - Number(player.x)
-    );
-    new_bullet.direction.vx = cos(angle);
-    new_bullet.direction.vy = sin(angle);
-    bullets.push(new_bullet);
-  }, game.effects.soundTimeout);
-}
-
 function keyPressed() {
-  // On echap key pause the game
-  if (keyCode === 32 && !game.paused) {
-    drawPause();
-    noLoop();
-    console.log("game paused");
-    game.paused = true;
-  } else if (keyCode === 32 && game.paused) {
-    loop();
-    console.log("game resumed");
-    game.paused = false;
+  // On space key pause the game
+  if (keyCode === 32) {
+    if (!game.paused) {
+      noLoop();
+      redraw(); // redraw the canvas to show the pause text
+    } else {
+      loop();
+    }
+    game.paused = !game.paused;
   }
 }
 
 function drawPause() {
-  fill(255, 0, 0);
-  textSize(32);
-  text("Game paused", 10, 30);
-}
-
-function startMobSpawning() {
-  game.mob.weak.spawnInterval = setInterval(() => {
-    if (game.paused) return;
-
-    spawnMob(game.mob.weak);
-  }, game.mob.weak.spawnIntervalDuration);
-}
-
-function stopMobSpawning() {
-  clearInterval(game.mob.weak.spawnInterval);
-}
-
-const startBulletShooting = () => {
-  game.bullet.shootingInterval = setInterval(() => {
-    if (game.paused) return;
-
-    shootBullet();
-  }, game.bullet.shootingIntervalDuration);
-};
-
-const stopBulletShooting = () => {
-  clearInterval(game.bullet.shootingInterval);
-};
-
-/**
- * Spawn a mob in a random position at a certain distance from the player
- * @param {Object} { imgPath, width, height, speed, radiusFromPlayer, overlap } Patron of the mob to spawn
- */
-function spawnMob({
-  imgPath,
-  width,
-  height,
-  speed,
-  radiusFromPlayer,
-  overlap,
-  health,
-}) {
-  let new_mob = {};
-  new_mob.img = loadImage(imgPath);
-  new_mob.width = width;
-  new_mob.height = height;
-  new_mob.speed = speed;
-  new_mob.x = player.x + random(-radiusFromPlayer, radiusFromPlayer);
-  new_mob.y = player.y + random(-radiusFromPlayer, radiusFromPlayer);
-  new_mob.overlap = overlap;
-  new_mob.health = health;
-  game.mob.weak.alive.push(new_mob);
-}
-
-function drawMobs() {
-  game.mob.weak.alive.forEach((mob) => {
-    // move the mob closer to player
-    if (player.x > mob.x) {
-      mob.x += mob.speed;
-    } else if (player.x < mob.x) {
-      mob.x -= mob.speed;
-    }
-    if (player.y > mob.y) {
-      mob.y += mob.speed;
-    } else if (player.y < mob.y) {
-      mob.y -= mob.speed;
-    }
-    image(mob.img, mob.x, mob.y, mob.width, mob.height);
-  });
+  fill(game.ui.pause.textColor);
+  textSize(game.ui.pause.textSize);
+  text(game.ui.pause.text, game.ui.pause.x, game.ui.pause.y);
 }
 
 function handleCollisions() {
@@ -354,18 +145,45 @@ function handleCollisions() {
  * @param {x, y} param0 movement vector of the player
  */
 function moveEveryEntity({ x, y }) {
+  // move the mobs
   game.mob.weak.alive.forEach((mob) => {
     mob.x -= x;
     mob.y -= y;
   });
+
+  // move the bullets
   bullets.forEach((bullet) => {
     bullet.x -= x;
     bullet.y -= y;
   });
+
+  // move the background, using the offset between 0 and the tile size
+  game.background.offset.x =
+    (game.background.offset.x - x) % game.background.tileWidth;
+  game.background.offset.y =
+    (game.background.offset.y - y) % game.background.tileHeight;
 }
 
 function startBackgroundMusic() {
   game.music.loop = true;
   game.music.volume = 0.1;
   game.music.play();
+}
+
+function drawBackground() {
+  // repeat the background image to fill the screen
+  startingPosition = {
+    x: Number(game.background.offset.x) - game.background.tileWidth,
+    y: Number(game.background.offset.y) - game.background.tileHeight,
+  };
+
+  for (let x = startingPosition.x; x < width; x += game.background.tileWidth) {
+    for (
+      let y = startingPosition.y;
+      y < height;
+      y += game.background.tileHeight
+    ) {
+      image(game.background.img, x, y);
+    }
+  }
 }
