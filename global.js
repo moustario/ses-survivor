@@ -21,6 +21,7 @@ const player = {
 
 const game = {
   paused: false,
+  gameOver: false,
   music: null,
   mob: {
     weak: {
@@ -48,3 +49,7 @@ const game = {
 };
 
 let bullets = [];
+
+function gameIsRunning() {
+  return !game.gameOver && !game.paused;
+}

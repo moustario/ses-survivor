@@ -124,7 +124,7 @@ function collisionWithMob(mobsArray) {
 
 const startBulletShooting = () => {
   bulletPatron.shootingInterval = setInterval(() => {
-    if (game.paused) return;
+    if (!gameIsRunning()) return;
 
     shootBullet();
   }, bulletPatron.shootingIntervalDuration);

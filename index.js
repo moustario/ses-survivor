@@ -8,6 +8,7 @@ function setup() {
   createCanvas(canva.width, canva.height);
   loadPlayer();
   loadBullet();
+  loadUI();
   startMobSpawning();
   startBulletShooting();
   startBackgroundMusic();
@@ -25,7 +26,17 @@ function draw() {
   handleCollisions();
   cleanObjects();
 
+  checkEndGame();
+
   drawUI();
+}
+
+function checkEndGame() {
+  if (player.health <= 0) {
+    game.gameOver = true;
+    noLoop();
+    redraw();
+  }
 }
 
 function cleanObjects() {
