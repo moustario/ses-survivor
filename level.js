@@ -13,7 +13,6 @@ const background = {
 
 function loadBackGround() {
   background.basicTile.img = loadImage(background.basicTile.imgPath);
-  background.obstacleTile.img = loadImage(background.obstacleTile.imgPath);
 }
 
 function drawBackground() {
