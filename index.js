@@ -51,7 +51,7 @@ function cleanObjects() {
 
 function keyPressed() {
   // On space key pause the game
-  if (keyCode === 32) {
+  if (keyCode === 32 && !game.gameOver) {
     if (!game.paused) {
       noLoop();
       redraw(); // redraw the canvas to show the pause text
