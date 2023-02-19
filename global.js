@@ -1,6 +1,6 @@
 const canva = {
-  width: window.innerWidth - 4,
-  height: window.innerHeight - 4,
+  width: document.documentElement.scrollWidth - 20,
+  height: document.documentElement.scrollHeight - 20,
   obj: null,
 };
 
@@ -23,6 +23,7 @@ const game = {
   paused: false,
   gameOver: false,
   music: null,
+  startingTime: null,
   mob: {
     weak: {
       alive: [],

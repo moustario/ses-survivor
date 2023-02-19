@@ -17,6 +17,24 @@ const pause = {
   y: canva.height / 3,
 };
 
+const score = {
+  text: "☠",
+  textSize: 25,
+  textFont: "Arial",
+  textColor: [255, 255, 255],
+  x: (canva.width / 3) * 2,
+  y: 20,
+};
+
+const timer = {
+  text: "⏱",
+  textSize: 35,
+  textFont: "Arial",
+  textColor: [255, 255, 255],
+  x: canva.width / 2,
+  y: 20,
+};
+
 const gameOver = {
   text: "GAME OVER",
   textSize: 50,
@@ -61,11 +79,14 @@ const gameOver = {
     "'...'",
     "Can't you do a little better than 'this'?",
     "Wow you must be really bad at squash",
+    "You're so bad, you did 6 commit called 'oups'",
   ],
 };
 
 function drawUI() {
+  drawScore();
   drawHealthBar();
+  drawTimer();
   if (game.paused) {
     drawPause();
   }
@@ -88,6 +109,24 @@ function drawPause() {
   textAlign(CENTER, CENTER);
   textSize(pause.textSize);
   text(pause.text, pause.x, pause.y);
+}
+
+function drawScore() {
+  fill(score.textColor);
+  textAlign(CENTER, CENTER);
+  textSize(score.textSize);
+  text(game.mob.weak.killed + " " + score.text, score.x, score.y);
+}
+
+function drawTimer() {
+  fill(timer.textColor);
+  textAlign(CENTER, CENTER);
+  textSize(timer.textSize);
+  const timeSpendinGame = millis() - game.startingTime;
+  const minutes = floor(timeSpendinGame / 1000 / 60);
+  const seconds = floor(timeSpendinGame / 1000) % 60;
+  const timeString = minutes + ":" + seconds;
+  text(timeString, timer.x, timer.y);
 }
 
 function drawHealthBar() {

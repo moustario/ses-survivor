@@ -12,6 +12,8 @@ function setup() {
   startMobSpawning();
   startBulletShooting();
   startBackgroundMusic();
+
+  game.startingTime = millis();
 }
 
 function draw() {
