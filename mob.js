@@ -17,7 +17,7 @@ const mobPatron = {
 
 function startMobSpawning() {
   game.mob.weak.spawnInterval = setInterval(() => {
-    if (game.paused) return;
+    if (game.paused || game.gameOver) return;
 
     spawnMob(mobPatron.weak);
   }, mobPatron.weak.spawnIntervalDuration);
