@@ -37,16 +37,6 @@ const game = {
     bulletSoundPath: "./assets/tennis_ball.mp3",
     soundTimeout: 300,
   },
-  background: {
-    imgPath: "./assets/floor/floor.png",
-    img: null,
-    tileWidth: 50,
-    tileHeight: 50,
-    offset: {
-      x: 0,
-      y: 0,
-    },
-  },
 };
 
 let bullets = [];

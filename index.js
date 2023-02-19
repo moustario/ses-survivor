@@ -1,7 +1,7 @@
 function preload() {
   game.music = createAudio(game.effects.backgroundMusicPath);
   game.effects.bulletSound = new Audio(game.effects.bulletSoundPath);
-  game.background.img = loadImage(game.background.imgPath);
+  loadBackGround();
 }
 
 function setup() {
@@ -199,32 +199,10 @@ function moveEveryEntity({ x, y }) {
     bullet.y -= y;
   });
 
-  // move the background, using the offset between 0 and the tile size
-  game.background.offset.x =
-    (game.background.offset.x - x) % game.background.tileWidth;
-  game.background.offset.y =
-    (game.background.offset.y - y) % game.background.tileHeight;
+  moveBackground({ x, y });
 }
 
 function startBackgroundMusic() {
   game.music.loop();
   game.music.volume(0.1);
-}
-
-function drawBackground() {
-  // repeat the background image to fill the screen
-  startingPosition = {
-    x: Number(game.background.offset.x) - game.background.tileWidth,
-    y: Number(game.background.offset.y) - game.background.tileHeight,
-  };
-
-  for (let x = startingPosition.x; x < width; x += game.background.tileWidth) {
-    for (
-      let y = startingPosition.y;
-      y < height;
-      y += game.background.tileHeight
-    ) {
-      image(game.background.img, x, y);
-    }
-  }
 }
