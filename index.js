@@ -68,7 +68,9 @@ function keyPressed() {
     if (!game.paused) {
       noLoop();
       redraw(); // redraw the canvas to show the pause text
+      game.lastOffTimeStart = millis();
     } else {
+      game.offTime += millis() - game.lastOffTimeStart;
       loop();
     }
     game.paused = !game.paused;

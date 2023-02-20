@@ -80,6 +80,12 @@ const gameOver = {
     "Can't you do a little better than 'this'?",
     "Wow you must be really bad at squash",
     "You're so bad, you did 6 commit called 'oups'",
+    "You're done.",
+    "Amine t'a tuer",
+    "Is someone need help?",
+    "diventa bravo niubbo",
+    "stare bene",
+    "You make me ashame, and I'm not your mother"
   ],
 };
 
@@ -122,7 +128,8 @@ function drawTimer() {
   fill(timer.textColor);
   textAlign(CENTER, CENTER);
   textSize(timer.textSize);
-  const timeSpendinGame = millis() - game.startingTime;
+  const timeSpendinGame = millis() - game.startingTime - game.offTime;
+  console.log("timeSpendinGame", timeSpendinGame);
   const minutes = floor(timeSpendinGame / 1000 / 60);
   const seconds = floor(timeSpendinGame / 1000) % 60;
   const timeString = minutes + ":" + seconds;

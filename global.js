@@ -24,6 +24,8 @@ const game = {
   gameOver: false,
   music: null,
   startingTime: null,
+  offTime : 0,
+  lastOffTimeStart : null,
   mob: {
     weak: {
       alive: [],
