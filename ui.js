@@ -85,7 +85,10 @@ const gameOver = {
     "Is someone need help?",
     "diventa bravo niubbo",
     "stare bene",
-    "You make me ashame, and I'm not your mother"
+    "You make me ashame, and I'm not your mother",
+    "Coucou t'as perdu !",
+    "Bien 'joué'!",
+    "ELINEMATED",
   ],
 };
 
