@@ -20,7 +20,7 @@ function draw() {
   drawBackground();
 
   drawPlayer();
-  playerControls();
+  playerControls(); // this move every element on the canvas if the player moves
 
   drawBullets();
   drawMobs();

@@ -85,7 +85,7 @@ const gameOver = {
     "Is someone need help?",
     "diventa bravo niubbo",
     "stare bene",
-    "You make me ashame, and I'm not your mother"
+    "You make me ashame, and I'm not your mother",
   ],
 };
 
@@ -99,6 +99,10 @@ function drawUI() {
   if (game.gameOver) {
     drawGameOver();
   }
+  if (game.levelUp) {
+    game.paused = true;
+    drawLevelUp();
+  }
 }
 
 function loadUI() {
@@ -108,6 +112,12 @@ function loadUI() {
   gameOver.randomGif1 = createImg(random(gameOver.gifPaths));
   gameOver.randomGif1.hide();
   gameOver.randomPhrase = random(gameOver.loserPhrases);
+}
+
+function drawLevelUp() {
+  document.getElementsByTagName("canvas")[0].style.filter = "blur(5px)";
+  document.getElementById("levelUpMenu").style.display = "block";
+  document.getElementById("levelUpMenu").childNodes[5].focus();
 }
 
 function drawPause() {
@@ -129,7 +139,6 @@ function drawTimer() {
   textAlign(CENTER, CENTER);
   textSize(timer.textSize);
   const timeSpendinGame = millis() - game.startingTime - game.offTime;
-  console.log("timeSpendinGame", timeSpendinGame);
   const minutes = floor(timeSpendinGame / 1000 / 60);
   const seconds = floor(timeSpendinGame / 1000) % 60;
   const timeString = minutes + ":" + seconds;

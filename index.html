@@ -26,8 +26,63 @@
         padding-top: 2px;
         padding-left: 2px;
       }
+      #levelUpMenu {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: pink;
+        border: 1px solid #000;
+        border-radius: 1em;
+        padding: 10px;
+        text-align: center;
+        z-index: 100;
+        display: none;
+        width: 60%;
+        height: 70%;
+      }
+      .upgrade {
+        appearance: none;
+        background-image: url("./assets/akon.png");
+        background-size: contain;
+        background-repeat: no-repeat;
+        height: 50px;
+        width: 35px;
+        padding: 0;
+      }
+      .upgrade:checked {
+        border: 5px solid rgb(221, 152, 163);
+        outline: none;
+      }
     </style>
   </head>
 
-  <body></body>
+  <body>
+    <div id="levelUpMenu">
+      <h1>Level Up!</h1>
+      <p>Choose a Weapon</p>
+      <input
+        class="upgrade"
+        type="radio"
+        id="huey"
+        name="drone"
+        value="huey"
+        checked
+      />
+      <input
+        class="upgrade"
+        type="radio"
+        id="dewey"
+        name="drone"
+        value="dewey"
+      />
+      <input
+        class="upgrade"
+        type="radio"
+        id="louie"
+        name="drone"
+        value="louie"
+      />
+    </div>
+  </body>
 </html>
