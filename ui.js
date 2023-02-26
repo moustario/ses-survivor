@@ -135,7 +135,8 @@ function drawTimer() {
   console.log("timeSpendinGame", timeSpendinGame);
   const minutes = floor(timeSpendinGame / 1000 / 60);
   const seconds = floor(timeSpendinGame / 1000) % 60;
-  const timeString = minutes + ":" + seconds;
+  // give time in the format 00:00
+  const timeString = nf(minutes, 2) + ":" + nf(seconds, 2);
   text(timeString, timer.x, timer.y);
 }
 
