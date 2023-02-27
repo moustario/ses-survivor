@@ -1,7 +1,6 @@
 function preload() {
   game.music = createAudio(game.effects.backgroundMusicPath);
   game.effects.bulletSound = new Audio(game.effects.bulletSoundPath);
-  loadBackGround();
 }
 
 function setup() {
@@ -12,6 +11,7 @@ function setup() {
   startMobSpawning();
   startBulletShooting();
   startBackgroundMusic();
+  loadBackGround();
 
   game.startingTime = millis();
 }
@@ -19,6 +19,7 @@ function setup() {
 function draw() {
   drawBackground();
 
+  drawPickups();
   drawPlayer();
   playerControls(); // this move every element on the canvas if the player moves
 
@@ -29,6 +30,7 @@ function draw() {
   cleanObjects();
 
   checkEndGame();
+  handleGameLoop();
 
   drawUI();
 }
@@ -56,6 +58,29 @@ function cleanObjects() {
   // remove dead mobs
   game.mob.weak.alive = game.mob.weak.alive.filter((mob) => {
     if (mob.health <= 0) {
+      mob.dead();
+      return false;
+    }
+    return true;
+  });
+
+  // remove xp pickups
+  const playerCenter = {
+    x: player.x + player.width / 2,
+    y: player.y + player.height / 2,
+  };
+  game.xpPickups = game.xpPickups.filter((xpPickup) => {
+    const pickupCenter = {
+      x: xpPickup.x + xpPickup.width / 2,
+      y: xpPickup.y + xpPickup.height / 2,
+    };
+    // if distance between player and xp pickup is less than the pickup radius of both
+    const distance = Math.sqrt(
+      Math.pow(playerCenter.x - pickupCenter.x, 2) +
+        Math.pow(playerCenter.y - pickupCenter.y, 2)
+    );
+    if (distance < player.pickupRadius + xpPickup.pickupRadius) {
+      player.addXp(xpPickup.value);
       return false;
     }
     return true;
@@ -64,16 +89,25 @@ function cleanObjects() {
 
 function keyPressed() {
   // On space key pause the game
-  if (keyCode === 32 && !game.gameOver) {
-    if (!game.paused) {
-      noLoop();
-      redraw(); // redraw the canvas to show the pause text
-      game.lastOffTimeStart = millis();
-    } else {
-      game.offTime += millis() - game.lastOffTimeStart;
-      loop();
-    }
+  if (keyCode === 32) {
     game.paused = !game.paused;
+    redraw();
+  }
+
+  // if enter is pressed restart the game
+  if (keyCode === 13) {
+    if (game.levelUp) {
+      chooseWeapon();
+    }
+  }
+}
+
+function handleGameLoop() {
+  if (gameIsRunning()) {
+    loop();
+  } else {
+    noLoop();
+    redraw();
   }
 }
 
@@ -202,6 +236,12 @@ function moveEveryEntity({ x, y }) {
   });
 
   moveBackground({ x, y });
+
+  // move the xp pickups
+  game.xpPickups.forEach((xpPickup) => {
+    xpPickup.x -= x;
+    xpPickup.y -= y;
+  });
 }
 
 function startBackgroundMusic() {

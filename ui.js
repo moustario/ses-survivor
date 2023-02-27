@@ -17,13 +17,22 @@ const pause = {
   y: canva.height / 3,
 };
 
+const xpBar = {
+  x: 0,
+  y: 0,
+  width: canva.width,
+  height: 15,
+  backgroundColor: [0, 0, 0],
+  color: [0, 0, 255],
+};
+
 const score = {
   text: "☠",
   textSize: 25,
   textFont: "Arial",
   textColor: [255, 255, 255],
   x: (canva.width / 3) * 2,
-  y: 20,
+  y: 20 + xpBar.height,
 };
 
 const timer = {
@@ -32,7 +41,7 @@ const timer = {
   textFont: "Arial",
   textColor: [255, 255, 255],
   x: canva.width / 2,
-  y: 20,
+  y: 20 + xpBar.height,
 };
 
 const gameOver = {
@@ -93,6 +102,7 @@ function drawUI() {
   drawScore();
   drawHealthBar();
   drawTimer();
+  drawXpBar();
   if (game.paused) {
     drawPause();
   }
@@ -100,7 +110,6 @@ function drawUI() {
     drawGameOver();
   }
   if (game.levelUp) {
-    game.paused = true;
     drawLevelUp();
   }
 }
@@ -118,6 +127,20 @@ function drawLevelUp() {
   document.getElementsByTagName("canvas")[0].style.filter = "blur(5px)";
   document.getElementById("levelUpMenu").style.display = "block";
   document.getElementById("levelUpMenu").childNodes[5].focus();
+}
+
+function chooseWeapon() {
+  console.log("chooseWeapon");
+}
+
+function drawXpBar() {
+  fill(xpBar.backgroundColor);
+  rect(xpBar.x, xpBar.y, xpBar.width, xpBar.height);
+
+  fill(xpBar.color);
+  const currentXpRatio = player.xp / player.xpToNextLevel;
+  rect(xpBar.x, xpBar.y, xpBar.width * currentXpRatio, xpBar.height);
+  // player.computenextLevelXp();
 }
 
 function drawPause() {

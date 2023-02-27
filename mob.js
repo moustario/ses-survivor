@@ -15,6 +15,28 @@ const mobPatron = {
   },
 };
 
+const mob = {
+  img: null,
+  width: 0,
+  height: 0,
+  x: 0,
+  y: 0,
+  speed: 0,
+  overlap: 0,
+  health: 0,
+  damage: 0,
+  dead: function () {
+    // create new xp pickup
+    const new_xp = Object.create(xpPickups);
+    new_xp.x = this.x;
+    new_xp.y = this.y;
+    new_xp.img = loadImage(xpPickups.imgPath);
+    new_xp.pickupRadius = Math.min(new_xp.width, new_xp.height) / 2;
+    // add xp pickup to the array
+    game.xpPickups.push(new_xp);
+  },
+};
+
 function startMobSpawning() {
   game.mob.weak.spawnInterval = setInterval(() => {
     if (!gameIsRunning()) return;
@@ -41,14 +63,14 @@ function spawnMob({
   spawingHalo,
   damage,
 }) {
-  let new_mob = {};
+  const new_mob = Object.create(mob);
   new_mob.img = loadImage(imgPath);
   new_mob.width = width;
   new_mob.height = height;
   new_mob.speed = speed;
-  // random position betwen cercle of radius spawnHalo.start and spawnHalo.end
+  // random distance betwen cercle of radius spawnHalo.start and spawnHalo.end
   const distanceFromPlayer = random(spawingHalo.start, spawingHalo.end);
-  // random angle
+  // random angle from the player
   const angle = random(0, 2 * Math.PI);
   new_mob.x = player.x + distanceFromPlayer * Math.cos(angle);
   new_mob.y = player.y + distanceFromPlayer * Math.sin(angle);
